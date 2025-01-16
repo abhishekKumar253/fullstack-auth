@@ -3,17 +3,17 @@ import axios from "axios";
 
 const API_URL =
   import.meta.env.MODE === "development"
-    ? "http://localhost:5000/api/v1/auth"
-    : "/api/v1/auth";
+    ? "http://localhost:5000/api/auth" : "/api/auth"
 
 axios.defaults.withCredentials = true;
 
 export const useAuthStore = create((set) => ({
   user: null,
-  isAuthenticated: false,
-  error: null,
-  isLoading: false,
-  isCheckingAuth: true,
+	isAuthenticated: false,
+	error: null,
+	isLoading: false,
+	isCheckingAuth: true,
+	message: null,
 
   signup: async (email, password, fullName, username) => {
     set({ isLoading: true, error: null });
@@ -53,10 +53,11 @@ export const useAuthStore = create((set) => ({
         isLoading: false,
       });
     } catch (error) {
-      set({
-        error: error.response?.data?.message || "Error logging in",
-        isLoading: false,
-      });
+     set({
+       error: error.response?.data?.message || "Error logging in",
+       isLoading: false,
+     });
+     throw error;
     }
   },
 
@@ -104,7 +105,11 @@ export const useAuthStore = create((set) => ({
         isCheckingAuth: false,
       });
     } catch (error) {
-      set({ error: null, isCheckingAuth: false, isAuthenticated: false });
+      set({
+        error: error.response.data.message || "Error checking auth",
+        isCheckingAuth: false,
+      });
+      throw error;
     }
   },
 
